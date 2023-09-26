@@ -22,6 +22,14 @@ int row(int position);
  * */
 int col(int position);
 
+/* returns the position associated with row and col
+ *
+ * @param row desired row
+ * @param col desired column
+ * @return int associated position (1-9)
+ * */
+int position(int row, int col);
+
 /* initializes the table with an empty space
  *
  * @param table the table to initialize

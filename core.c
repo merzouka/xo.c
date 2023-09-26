@@ -1,6 +1,7 @@
 #include "core.h"
 #include "io.h"
 #include "helpers.h"
+#include "common.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,7 +13,6 @@
 #include <unistd.h>
 #endif /* ifdef __unix__ */
 
-#define PLACEHOLDER ' '
 #define ESC         "\033["
 #define RED         ESC"38;5;124m"
 #define LIGHT_RED   ESC"38;5;196m"
