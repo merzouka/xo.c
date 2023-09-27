@@ -86,6 +86,7 @@ Position *completeDiag(char table[3][3], char player){
     }
 
     // diagonal 1-5-9
+    empty = -1;
     for (int i = 0; i < 3; i++){
         FILL_EMPTY(i, 2 - i, i, empty)
     }
@@ -95,8 +96,6 @@ Position *completeDiag(char table[3][3], char player){
     x = head->next; free(head);
     return x;
 }
-
-// add complete function
 
 bool containsPos(Position *haystack, int needle){
     for (Position *x = haystack; x != NULL; x = x->next){
@@ -143,11 +142,22 @@ Position *merge(size_t num, ...){
     return p;
 }
 
+Position *complete(char table[3][3], char player){
+    Position *lists[] = {
+        completeRow(table, player), completeCol(table, player), completeDiag(table, player)
+    };
+    Position *result = merge(3, lists[0], lists[1], lists[2]);
+    for (int i = 0; i < 3; i++){
+        freePositionList(lists[i]);
+    }
+    return result;
+}
+
 int main(){
     char table[][3] = {
-        {'x', 'x', 'x'},
-        {' ', 'x', ' '},
-        {'x', ' ', ' '},
+        {'x', ' ', 'o'},
+        {' ', 'o', ' '},
+        {'x', ' ', 'x'},
     };
 
     return 0;
