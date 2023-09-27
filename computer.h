@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #ifndef COMPUTER
 #define COMPUTER
@@ -31,13 +32,13 @@ Position *append(Position *head, int position);
  * */
 bool containsPos(Position *haystack, int needle);
 
-/* returns a list of positions that when filled would complete a line for player
+/* returns the first position that when filled would complete a line for player
  *
  * @param table playing table
  * @param player x/o
- * @return (Position*) list of positions
+ * @return int found position
  * */
-Position *complete(char table[3][3], char player);
+int complete(char table[3][3], char player);
 
 /* prints list
  *
@@ -62,4 +63,73 @@ void freePositionList(Position *head);
  * @return (Position*) merged list
  * */
 Position *merge(size_t num, ...);
+
+/* checks if table is empty
+ *
+ * @param table to check
+ * @return bool is empty?
+ * */
+bool empty(char table[3][3]);
+
+/* copies table to copy
+ *
+ * @param table to copy
+ * @param copy to copy to
+ * @return void
+ * */
+void cpy(char table[3][3], char copy[3][3]);
+
+/* return diagonal associated with position:
+ * * 1 diagonal: 7-5-3
+ * * 0 diagonal: no diagonal
+ * * -1 diagonal: 9-5-1
+ *
+ * @param position desired position
+ * @return int diagonal
+ * */
+int diagonal(int position);
+
+/* checks if a column is filled by player
+ *
+ * @param table playing table 
+ * @param col column to check
+ * @param player x/o
+ * @return bool is filled?
+ * */
+bool lineAtCol(char table[3][3], int col, char player);
+
+/* checks if a row is filled by player
+ *
+ * @param table playing table
+ * @param row row to check
+ * @param player x/o
+ * @return bool is filled?
+ * */
+bool lineAtRow(char table[3][3], int row, char player);
+
+/* checks if a diagonal is filled by player
+ *
+ * @param table playing table
+ * @param diagonal diagonal to check
+ * @param player x/o
+ * @return bool is filled?
+ * */
+bool lineAtDiag(char table[3][3], int diagonal, char player);
+
+/* checks if position is part of any line filled by player
+ *
+ * @param table playing table
+ * @param position position to check
+ * @param player x/o
+ * @return bool has passing line?
+ * */
+bool lineAt(char table[3][3], int position, char player);
+
+/* next position to be chosen for player
+ *
+ * @param table playing table
+ * @param player x/o
+ * @return int next position
+ * */
+int next(char table[3][3], char player);
 #endif // !COMPUTER

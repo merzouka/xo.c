@@ -1,6 +1,7 @@
 #include "common.h"
 #include "core.h"
 #include "computer.h"
+#include "helpers.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -43,46 +44,40 @@ Position *append(Position *head, int pos){
     return append(head->next, pos);
 }
 
-Position *completeRow(char table[3][3], char player){
-    Position *head = create(-1);
-    Position *x = head;
+int completeRow(char table[3][3], char player){
     for (int i = 0; i < 3; i++){
         int empty = -1;
         for (int j = 0; j < 3; j++){
             FILL_EMPTY(i, j, j, empty);
         }
         if (empty != -1){
-            x = append(x, position(i, empty));
+            return position(i, empty);
         }
     }
-    x = head->next; free(head); 
-    return x;
+    return -1;
 }
 
-Position *completeCol(char table[3][3], char player){
-    Position *head = create(-1); Position *x = head;
+int completeCol(char table[3][3], char player){
     for (int j = 0; j < 3; j++){
         int empty = -1;
         for (int i = 0; i < 3; i++){
             FILL_EMPTY(i, j, i, empty);
         }
         if (empty != -1){
-            x = append(x, position(empty, j));
+            return position(empty, j);
         }
     }
-    x = head->next; free(head);
-    return x;
+    return -1;
 }
 
-Position *completeDiag(char table[3][3], char player){
+int completeDiag(char table[3][3], char player){
     // diagonal 7-5-3
-    Position *head = create(-1); Position *x = head;
     int empty = -1;
     for (int i = 0; i < 3; i++){
         FILL_EMPTY(i, i, i, empty);
     }
     if (empty != -1){
-        x = append(x, position(empty, empty));
+        return position(empty, empty);
     }
 
     // diagonal 1-5-9
@@ -91,10 +86,9 @@ Position *completeDiag(char table[3][3], char player){
         FILL_EMPTY(i, 2 - i, i, empty)
     }
     if (empty != -1){
-        x = append(x, position(empty, 2 - empty));
+        return position(empty, 2 - empty);
     }
-    x = head->next; free(head);
-    return x;
+    return -1;
 }
 
 bool containsPos(Position *haystack, int needle){
@@ -142,23 +136,147 @@ Position *merge(size_t num, ...){
     return p;
 }
 
-Position *complete(char table[3][3], char player){
-    Position *lists[] = {
+int complete(char table[3][3], char player){
+    int positions[] = {
         completeRow(table, player), completeCol(table, player), completeDiag(table, player)
     };
-    Position *result = merge(3, lists[0], lists[1], lists[2]);
     for (int i = 0; i < 3; i++){
-        freePositionList(lists[i]);
+        if (positions[i] != -1){
+            return positions[i];
+        }
     }
-    return result;
+    return -1;
+}
+
+bool empty(char table[3][3]){
+    // search starts from both table ends
+    for (int i = 0; i < 2; i++){
+        for (int j = 0; j < 3 && !(position(i, j) == 5); j++){
+            if (table[i][j] != PLACEHOLDER || table[2 - i][2 - j] != PLACEHOLDER){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void cpy(char table[3][3], char copy[3][3]){
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            copy[i][j] = table[i][j];
+        }
+    }
+}
+
+int diagonal(int position){
+    if (contains(3, (int[]){7, 5, 3}, position)){
+        return 1;
+    }
+    return contains(3, (int[]){1, 5, 9}, position) ? -1 : 0;
+}
+
+bool lineAtCol(char table[3][3], int col, char player){
+    for (int i = 0; i < 3; i++){
+        if (table[i][col] != player){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool lineAtRow(char table[3][3], int row, char player){
+    for (int j = 0; j < 3; j++){
+        if (table[row][j] != player){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool lineAtDiag(char table[3][3], int diagonal, char player){
+    if (diagonal == 0){
+        return false;
+    }
+    for (int i = 0; i < 3; i++){
+        if (table[i][diagonal == 1 ? i : 2 - i] != player){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool lineAt(char table[3][3], int position, char player){
+    return 
+        lineAtCol(table, col(position), player) ||
+        lineAtRow(table, row(position), player) ||
+        lineAtDiag(table, diagonal(position), player) ||
+        // check the diagonal 1-5-9
+        (position == 5 ? lineAtDiag(table, -1, player) : 0);
+}
+
+bool other(char player){
+    return player == 'x' ? 'o' : 'o';
+}
+
+int connections(char table[3][3], int position, char player){
+    return 0;    
+}
+
+int next(char table[3][3], char player){
+    // start
+    if (empty(table)){
+        if (player == 'o'){
+            return 5;
+        }
+        if (player == 'x'){
+            int corners[] = {1, 3, 7, 9};
+            srand(time(NULL));
+            return corners[rand() % 4];
+        }
+    }
+
+    // finish
+    int finish = complete(table, player);
+    if (finish != -1){
+        return finish;
+    }
+
+    // defense
+    finish = complete(table, other(player));
+    if (finish != -1){
+        return finish;
+    }
+
+    int emptyPosition = -1;
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            if (table[i][j] == PLACEHOLDER){
+                char decoy[3][3]; cpy(table, decoy); decoy[i][j] = player;
+                char virtual = other(player);
+                emptyPosition = position(i, j);
+                while (true){
+                    int pos = next(decoy, virtual); setsqr(decoy, pos, virtual);
+                    if (lineAt(decoy, pos, virtual) || tie(decoy)){
+                        if (virtual == player){
+                            return position(i, j);
+                        }
+                        break;
+                    }
+                    virtual = other(virtual);
+                }
+            }
+        }
+    }
+    return emptyPosition;
 }
 
 int main(){
     char table[][3] = {
-        {'x', ' ', 'o'},
-        {' ', 'o', ' '},
-        {'x', ' ', 'x'},
+        {'x', 'o', ' '},
+        {'o', ' ', ' '},
+        {'x', ' ', ' '},
     };
+    printf("next: %d\n", next(table, 'x'));
 
     return 0;
 }
