@@ -13,15 +13,6 @@
 #include <unistd.h>
 #endif /* ifdef __unix__ */
 
-#define ESC         "\033["
-#define RED         ESC"38;5;124m"
-#define LIGHT_RED   ESC"38;5;196m"
-#define GREEN       ESC"38;5;76m"
-#define BLUE        ESC"38;5;45m"
-#define GRAY        ESC"38;5;251m"
-#define BOLD        ESC"1m"
-#define EXIT        ESC"0m"
-
 void clrscr(){
     // system("clear");
     printf("\e[1;1H\e[2J");
@@ -79,7 +70,7 @@ void highlight(const char table[3][3], size_t len, int positions[]){
     }
 }
 
-void setsqr(char table[3][3], char player, int position){
+void setsqr(char table[3][3], int position, char player){
     table[row(position)][col(position)] = player;
 }
 
@@ -92,7 +83,7 @@ bool valid(char table[3][3], int position){
     return false;
 }
 
-bool rowAlignment(char table[3][3], char player){
+bool hasFilledRow(char table[3][3], char player){
     bool found;
     int positions[3];
     for (int i = 0; i < 3; i++){
@@ -111,7 +102,7 @@ bool rowAlignment(char table[3][3], char player){
     return found;
 }
 
-bool colAlignment(char table[3][3], char player){
+bool hasFilledCol(char table[3][3], char player){
     bool found;
     int positions[3];
     for (int j = 0; j < 3; j++){
@@ -130,7 +121,7 @@ bool colAlignment(char table[3][3], char player){
     return found;
 }
 
-bool diagonalAlignment(char table[3][3], char player){
+bool hasFilledDiag(char table[3][3], char player){
     bool found = true;
     int positions[3];
     // diagonal 7-5-3 
@@ -156,7 +147,7 @@ bool diagonalAlignment(char table[3][3], char player){
 }
 
 bool wins(char table[3][3], char player){
-    return rowAlignment(table, player) || colAlignment(table, player) || diagonalAlignment(table, player);
+    return hasFilledRow(table, player) || hasFilledCol(table, player) || hasFilledDiag(table, player);
 }
 
 bool tie(char table[3][3]){
@@ -170,7 +161,7 @@ bool tie(char table[3][3]){
     return true;
 }
 
-void start(char table[3][3]){
+void startPvP(char table[3][3]){
     init(table);
     char player = 'x';
     int position = -1;
@@ -182,7 +173,7 @@ void start(char table[3][3]){
             continue;
         }
 
-        setsqr(table, player, position);
+        setsqr(table, position, player);
         if (wins(table, player)){
             printf(BOLD"player ""%s%c"EXIT""BOLD" wins.\n"EXIT, player == 'x' ? LIGHT_RED : GREEN, player); break;
         }

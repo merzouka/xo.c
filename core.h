@@ -58,7 +58,7 @@ void highlight(const char table[3][3], size_t len, int positions[]);
  * @param position chosen position
  * @return void
  * */
-void setsqr(char table[3][3], char player, int position);
+void setsqr(char table[3][3], int position, char player);
 
 /* checks if position is valid, and prints message if not
  *
@@ -73,7 +73,7 @@ bool valid(char table[3][3], int position);
  * @param player x/o
  * @return bool has filled a row?
  * */
-bool rowAlignment(char table[3][3], char player);
+bool hasFilledRow(char table[3][3], char player);
 
 /* checks if player has filled a col
  *
@@ -81,7 +81,7 @@ bool rowAlignment(char table[3][3], char player);
  * @param player x/o
  * @return bool has filled a col?
  * */
-bool colAlignment(char table[3][3], char player);
+bool hasFilledCol(char table[3][3], char player);
 
 /* checks if player has filled a diagonal
  *
@@ -89,7 +89,7 @@ bool colAlignment(char table[3][3], char player);
  * @param player x/o
  * @return bool has filled a diagonal?
  * */
-bool diagonalAlignment(char table[3][3], char player);
+bool hasFilledDiag(char table[3][3], char player);
 
 /* checks if player wins 
  *
@@ -106,9 +106,10 @@ bool wins(char table[3][3], char player);
  * */
 bool tie(char table[3][3]);
 
-/* starts the game
+/* starts PvP game
  *
  * @param table playing table
+ * @return void
  * */
-void start(char table[3][3]);
+void startPvP(char table[3][3]);
 #endif // !CORE
